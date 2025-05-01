@@ -40,9 +40,11 @@ COPY --from=builder /app/requirements.txt .
 # Install wheels
 RUN pip install --no-cache /wheels/*
 
-# Copy application code and data
+# Copy application code
 COPY . .
-COPY data/csv/Copenhagen_hotels_clean.csv /app/data/csv/
+
+# Copy data file (using the correct relative path)
+COPY ./data/csv/Copenhagen_hotels_clean.csv /app/data/csv/
 
 # Set ownership of application files
 RUN chown -R appuser:appuser /app
