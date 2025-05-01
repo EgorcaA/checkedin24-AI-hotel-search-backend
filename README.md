@@ -17,8 +17,12 @@ docker build -t checkedin24-backend ./backend # Build the image
 
 docker run -p 8000:8000 checkedin24-backend # Run the container
 
+docker run -p 8000:8000 -e OPENAI_API_KEY=<APIKEY> checkedin24-backend
 '''
 
+docker ps
+docker exec -it 6ad4631b8626 bash
+flyctl ssh console -a checkedin24-ai-hotel-search-backend
 '''sh
 
 docker-compose up # Start all services
