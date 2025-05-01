@@ -18,6 +18,8 @@ jobs:
       - uses: superfly/flyctl-actions/setup-flyctl@master
 
       # Deploy to Fly.io
-      - run: flyctl deploy
+      - run: |
+          cd backend
+          flyctl deploy
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
