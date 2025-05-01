@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 import pandas as pd
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
 from ..logger import get_logger
@@ -20,16 +20,23 @@ router = APIRouter()
 # print(os.path.abspath('.'))
 
 
-# Get the absolute path to the project root
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-DATA_PATH = PROJECT_ROOT / "data" / "csv" / "Copenhagen_hotels_clean.csv"
+# Get data path from environment variable or use default
+DATA_DIR = os.getenv("HOTEL_DATA_DIR", "/app/data")
+DATA_PATH = Path(DATA_DIR) / "csv" / "Copenhagen_hotels_clean.csv"
 
-logger.info(f"Loading hotel data from {DATA_PATH}")
-pd.set_option("display.max_columns", None)
-hotels_1 = pd.read_csv(DATA_PATH)
-# hotels_1 = hotels_1.rename(columns={"hotel_name": "name"})
-ddhotels = hotels_1.to_dict(orient="records")
-logger.info(f"Successfully loaded {len(ddhotels)} hotels")
+logger.info(f"Attempting to load hotel data from {DATA_PATH}")
+
+try:
+    if not DATA_PATH.exists():
+        raise FileNotFoundError(f"Hotel data file not found at {DATA_PATH}")
+
+    pd.set_option("display.max_columns", None)
+    hotels_1 = pd.read_csv(DATA_PATH)
+    ddhotels = hotels_1.to_dict(orient="records")
+    logger.info(f"Successfully loaded {len(ddhotels)} hotels")
+except Exception as e:
+    logger.error(f"Failed to load hotel data: {str(e)}")
+    raise HTTPException(status_code=500, detail=f"Failed to load hotel data: {str(e)}")
 
 
 # Add this mapping based on your schema

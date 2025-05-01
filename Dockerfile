@@ -7,7 +7,8 @@ WORKDIR /app
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1
+    PIP_NO_CACHE_DIR=1 \
+    HOTEL_DATA_DIR=/app/data
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -29,32 +30,26 @@ RUN adduser --disabled-password --gecos '' appuser
 # Set working directory
 WORKDIR /app
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PATH="/home/appuser/.local/bin:$PATH"
+# Create data directory
+RUN mkdir -p /app/data/csv && chown -R appuser:appuser /app/data
 
 # Copy wheels from builder
 COPY --from=builder /app/wheels /wheels
 COPY --from=builder /app/requirements.txt .
 
-# Install dependencies
+# Install wheels
 RUN pip install --no-cache /wheels/*
 
-# Create data directory and copy CSV file
-RUN mkdir -p /app/data/csv
-COPY data/csv/Copenhagen_hotels_clean.csv /app/data/csv/
-
-# Copy project files
+# Copy application code
 COPY . .
 
-# Change ownership of the app directory
+# Set ownership of application files
 RUN chown -R appuser:appuser /app
 
 # Switch to non-root user
 USER appuser
 
-# Expose the port the app runs on
+# Expose port
 EXPOSE 8000
 
 # Command to run the application
