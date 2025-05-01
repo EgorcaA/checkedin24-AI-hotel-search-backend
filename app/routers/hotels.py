@@ -20,23 +20,23 @@ router = APIRouter()
 # print(os.path.abspath('.'))
 
 
-# Get data path from environment variable or use default
-DATA_DIR = os.getenv("HOTEL_DATA_DIR", "/app/data")
-DATA_PATH = Path(DATA_DIR) / "csv" / "Copenhagen_hotels_clean.csv"
+# # Get data path from environment variable or use default
+# DATA_DIR = os.getenv("HOTEL_DATA_DIR", "/app/data")
+# DATA_PATH = Path(DATA_DIR) / "csv" / "Copenhagen_hotels_clean.csv"
 
-logger.info(f"Attempting to load hotel data from {DATA_PATH}")
+# logger.info(f"Attempting to load hotel data from {DATA_PATH}")
 
-try:
-    if not DATA_PATH.exists():
-        raise FileNotFoundError(f"Hotel data file not found at {DATA_PATH}")
+# try:
+#     if not DATA_PATH.exists():
+#         raise FileNotFoundError(f"Hotel data file not found at {DATA_PATH}")
 
-    pd.set_option("display.max_columns", None)
-    hotels_1 = pd.read_csv(DATA_PATH)
-    ddhotels = hotels_1.to_dict(orient="records")
-    logger.info(f"Successfully loaded {len(ddhotels)} hotels")
-except Exception as e:
-    logger.error(f"Failed to load hotel data: {str(e)}")
-    raise HTTPException(status_code=500, detail=f"Failed to load hotel data: {str(e)}")
+# except Exception as e:
+#     logger.error(f"Failed to load hotel data: {str(e)}")
+#     raise HTTPException(status_code=500, detail=f"Failed to load hotel data: {str(e)}")
+pd.set_option("display.max_columns", None)
+hotels_1 = pd.read_csv("Copenhagen_hotels_clean.csv")
+ddhotels = hotels_1.to_dict(orient="records")
+logger.info(f"Successfully loaded {len(ddhotels)} hotels")
 
 
 # Add this mapping based on your schema
