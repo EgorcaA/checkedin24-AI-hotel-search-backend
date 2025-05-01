@@ -44,6 +44,9 @@ RUN pip install --no-cache /wheels/*
 # Copy project files
 COPY . .
 
+# Copy CSV file
+COPY data/csv/Copenhagen_hotels_clean.csv /app/data/csv/Copenhagen_hotels_clean.csv
+
 # Change ownership of the app directory
 RUN chown -R appuser:appuser /app
 
