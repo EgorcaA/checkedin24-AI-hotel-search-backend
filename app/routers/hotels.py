@@ -6,12 +6,15 @@ import pandas as pd
 from fastapi import APIRouter, Query
 from pydantic import BaseModel
 
+from ..logger import get_logger
 from ..params import amenities, main_params
 
 # from ..sample_data import hotels
 # from ..get_results import find_matching_hotels
 from ..process_hotels import find_matching_hotels
 from ..schemas import HotelResponse
+
+logger = get_logger(__name__)
 
 router = APIRouter()
 # print(os.path.abspath('.'))
@@ -21,10 +24,12 @@ router = APIRouter()
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 DATA_PATH = PROJECT_ROOT / "data" / "csv" / "Copenhagen_hotels_clean.csv"
 
+logger.info(f"Loading hotel data from {DATA_PATH}")
 pd.set_option("display.max_columns", None)
 hotels_1 = pd.read_csv(DATA_PATH)
 # hotels_1 = hotels_1.rename(columns={"hotel_name": "name"})
 ddhotels = hotels_1.to_dict(orient="records")
+logger.info(f"Successfully loaded {len(ddhotels)} hotels")
 
 
 # Add this mapping based on your schema
@@ -50,6 +55,7 @@ param_types = {
 
 
 def transform_hotels(hotels: pd.DataFrame) -> List[Dict[str, Any]]:
+    logger.debug("Transforming hotels data")
     hotels_result = []
     for i, row in hotels.iterrows():
         hotel = {}
@@ -70,6 +76,7 @@ def transform_hotels(hotels: pd.DataFrame) -> List[Dict[str, Any]]:
         hotel["amenities"] = [col for col in amenities if row[col] == True]
         # print(hotel)
         hotels_result.append(hotel)
+    logger.debug(f"Transformed {len(hotels_result)} hotels")
     return hotels_result
 
 
@@ -77,19 +84,28 @@ def transform_hotels(hotels: pd.DataFrame) -> List[Dict[str, Any]]:
 async def get_hotels(
     prompt: str = Query(None, description="Filter hotels by name or location")
 ):
+    logger.info(f"Received request for hotels with prompt: {prompt}")
+
     if not prompt:
-        return HotelResponse(hotels=transform_hotels(hotels_1), user_preferences={})
+        logger.debug("No prompt provided, returning all hotels")
+        return HotelResponse(
+            hotels=transform_hotels(hotels_1)[:10], user_preferences={}
+        )
 
     prompt = prompt.lower()
+    logger.debug(f"Processing prompt: {prompt}")
 
-    print("#########################")
-    print(prompt)
-    user_preferences, matching_hotels = find_matching_hotels(prompt, ddhotels)
+    user_preferences, matching_hotels = find_matching_hotels(
+        prompt, ddhotels
+    )  # Dict[str, Any], pd.Dataframe
     if len(matching_hotels) == 0:
+        logger.warning(f"No hotels found matching prompt: {prompt}")
         return HotelResponse(hotels=[], user_preferences=user_preferences)
 
-    # print(matching_hotels)
-
+    hotel_names = matching_hotels["hotel_name"].tolist()
+    logger.info(
+        f"Found {len(matching_hotels)} hotels matching the prompt, {hotel_names}"
+    )
     return HotelResponse(
         hotels=transform_hotels(matching_hotels), user_preferences=user_preferences
     )

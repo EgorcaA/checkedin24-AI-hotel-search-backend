@@ -3,7 +3,11 @@ import re
 from dotenv import load_dotenv
 from openai import OpenAI
 
+from .logger import get_logger
 from .params import amenities
+
+logger = get_logger(__name__)
+
 
 load_dotenv()
 import os
@@ -190,7 +194,9 @@ def filter_and_rank_hotels(df, user_preferences):
         "max_distancetoairport": "distancetoairport",
         "max_popular_location_rank": "popular_location_rank",
     }
-    print(len(df_filtered))
+    # print(len(df_filtered))
+    logger.debug("Starting hotel filtering and ranking")
+
     for key, config in user_preferences.get("fields", {}).items():
         if config["crucial"] and config["value"] is not None and key in field_map:
             col = field_map[key]
@@ -203,7 +209,7 @@ def filter_and_rank_hotels(df, user_preferences):
                 df_filtered = df_filtered[df_filtered[col] >= val]
             else:
                 df_filtered = df_filtered[df_filtered[col] == val]
-    print("after crutial fields ", len(df_filtered))
+    logger.debug(f"After crucial fields filtering: {len(df_filtered)} hotels")
 
     # 2. Filter by crucial amenities
     for amenity, config in user_preferences.get("amenities", {}).items():
@@ -211,7 +217,7 @@ def filter_and_rank_hotels(df, user_preferences):
         # print(df_filtered[amenity])
         if config["crucial"]:
             df_filtered = df_filtered[df_filtered[amenity] == 1]
-    print("after crutial amenities ", len(df_filtered))
+    logger.debug(f"After crucial amenities filtering: {len(df_filtered)} hotels")
 
     # # 3. Filter by crucial chooseparameters
     # for param, config in user_preferences.get("chooseparameters", {}).items():
@@ -289,6 +295,8 @@ def filter_and_rank_hotels(df, user_preferences):
         scores.append(normalized_score)
 
     df_filtered["match_score"] = scores
+    logger.debug(f"Scoring completed. Top score: {scores[0] if scores else 'N/A'}")
+    logger.info(f"Final filtered and ranked hotels: {len(df_filtered)}")
 
     return df_filtered.sort_values(by="match_score", ascending=False).reset_index(
         drop=True
@@ -313,33 +321,44 @@ def find_matching_hotels(query: str, hotels: dict[str, dict[str, object]]):
             }
 
     Returns:
-        list[str] | None: List of hotel_names that match the query, or None if the query is not hotel related.
+        pd.Dataframe | None: List of hotel_names that match the query, or None if the query is not hotel related.
     """
     # print(SYSTEM_PROMPT)
     # USER_PROMPT = ""  "I'd love to find afordable a family-friendly hotel surrounded by nature, perfect for a peaceful getaway, that also allows an extra bed for children."""
     # USER_PROMPT = """I want to live in a hotel with parking and I have a dog."""
     # USER_PROMPT = """Looking for hotel near the beach with a swimming pool and all included.
     # Prefer something with good reviews and not too far from the city center."""
-    print(query, "#########################")
-    response = client.responses.create(
-        model="gpt-4.1-mini",
-        instructions=SYSTEM_PROMPT,
-        input=query,
-        temperature=0,
-    )
-    print(response.output_text)
-    match = re.search(r"\{.*\}", response.output_text, re.DOTALL)
-    if match:
-        json_str = match.group(0)
-        user_preferences = json.loads(json_str)
-    else:
-        print("Error: wrong JSON found in response.")
-        return {"fields": {}, "chooseparameters": {}, "amenities": {}}, []
-    # user_preferences = json.loads(response.output_text)
-    print(user_preferences)
-    return user_preferences, filter_and_rank_hotels(hotels, user_preferences)
+    logger.info(f"Finding matching hotels for query: {query}")
 
+    try:
 
-# wifi, air_conditioning_in_all_rooms, private_bathroom, breakfast, free_onsite_parking, airport_shuttle, swimming_pool, fitness_facilities, restaurant, room_service, twenty_four_hour_reception, accessible, pets_allowed, family_rooms_available, non_smoking_rooms, laundry_service, luggage_storage, flat_screen_tv, concierge_service, multilingual_staff
+        response = client.responses.create(
+            model="gpt-4.1-mini",
+            instructions=SYSTEM_PROMPT,
+            input=query,
+            temperature=0,
+        )
 
-# print(response.output_text)
+        logger.debug(f"Received response from OpenAI API")
+        user_preferences = {}
+        match = re.search(r"\{.*\}", response.output_text, re.DOTALL)
+        if match:
+            user_preferences = json.loads(match.group(0))
+        else:
+            logger.warning("Query was unrelated to hotels")
+            return {}, []
+
+        logger.debug(f"Extracted user preferences: {user_preferences}")
+
+        # Convert hotels dict to DataFrame
+        df = pd.DataFrame(hotels)
+
+        # Filter and rank hotels
+        matching_hotels = filter_and_rank_hotels(df, user_preferences)
+
+        logger.info(f"Found {len(matching_hotels)} matching hotels")
+        return user_preferences, matching_hotels
+
+    except Exception as e:
+        logger.error(f"Error processing hotel search: {str(e)}", exc_info=True)
+        return {}, []

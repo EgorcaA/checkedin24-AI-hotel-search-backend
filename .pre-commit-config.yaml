@@ -1,0 +1,87 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-added-large-files
+        args: ["--maxkb=1024"]
+      - id: check-json
+        files: \.json$
+      - id: debug-statements
+      - id: requirements-txt-fixer
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: ["--profile", "black"]
+
+  - repo: https://github.com/psf/black
+    rev: 24.1.1
+    hooks:
+      - id: black
+        language_version: python3.12
+
+  - repo: local
+    hooks:
+      - id: project-structure
+        name: Check Project Structure
+        entry: |
+          bash -c '
+          if [ ! -f "requirements.txt" ]; then
+              echo "Error: requirements.txt is missing"
+              exit 1
+          fi
+          if [ ! -d "app" ]; then
+              echo "Error: app directory is missing"
+              exit 1
+          fi
+          if [ ! -f "app/main.py" ]; then
+              echo "Error: app/main.py is missing"
+              exit 1
+          fi
+          echo "All required files and directories are present"
+          '
+        language: system
+        pass_filenames: false
+
+      - id: function-argument-signature
+        name: Check Function Argument Signature
+        entry: |
+          python3 -c '
+          import ast
+          with open("app/process_hotels.py") as f:
+              tree = ast.parse(f.read())
+          for node in ast.walk(tree):
+              if isinstance(node, ast.FunctionDef) and node.name == "find_matching_hotels":
+                  args = [arg.arg for arg in node.args.args]
+                  assert len(args) == 2 and args[0] == "query" and args[1] == "hotels", f"Expected arguments (query, hotels) but got {args}"
+                  print("Function signature check passed")
+                  exit(0)
+          print("Error: find_matching_hotels function not found")
+          exit(1)
+          '
+        language: system
+        files: ^app/process_hotels\.py$
+
+      - id: import-test
+        name: Run Import Test
+        entry: |
+          python3.12 -c '
+          try:
+              from app.process_hotels import find_matching_hotels
+              # Test with a simple example
+              test_hotels = {"hotel1": {"name": "Test Hotel"}}
+              result = find_matching_hotels("test query", test_hotels)
+              print("✅ Successfully imported and called find_matching_hotels")
+              exit(0)
+          except Exception as e:
+              print(f"❌ Error: {str(e)}")
+              exit(1)
+          '
+        language: system
+        files: ^app/process_hotels\.py$
+        pass_filenames: false
+        verbose: true
