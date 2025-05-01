@@ -7,3 +7,6 @@ pip freeze > requirements.txt
 pre-commit install
 git add *
 git commit -m "mb hook"
+
+
+flyctl auth login

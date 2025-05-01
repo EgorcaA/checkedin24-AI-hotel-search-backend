@@ -14,7 +14,10 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:8080",
         "http://localhost:8081",
-        "https://checkedin24-aihotelsearch.vercel.app/",
+        "http://localhost:5173",  # Vite's default development port
+        "http://localhost:3000",
+        "https://checkedin24-aihotelsearch.vercel.app",  # Remove trailing slash
+        "*",  # Allow all origins temporarily for development
     ],  # Your frontend URL
     allow_credentials=True,
     allow_methods=["*"],
