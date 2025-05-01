@@ -1,0 +1,23 @@
+name: Deploy to Fly.io
+
+# Trigger the workflow on push to the main branch
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy app
+    runs-on: ubuntu-latest
+    steps:
+      # Check out the repository code
+      - uses: actions/checkout@v4
+
+      # Set up flyctl
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+
+      # Deploy to Fly.io
+      - run: flyctl deploy
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
