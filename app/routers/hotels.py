@@ -34,7 +34,7 @@ router = APIRouter()
 #     logger.error(f"Failed to load hotel data: {str(e)}")
 #     raise HTTPException(status_code=500, detail=f"Failed to load hotel data: {str(e)}")
 pd.set_option("display.max_columns", None)
-hotels_1 = pd.read_csv("Copenhagen_hotels_clean.csv")
+hotels_1 = pd.read_csv("./data/csv/Copenhagen_hotels_clean.csv")
 ddhotels = hotels_1.to_dict(orient="records")
 logger.info(f"Successfully loaded {len(ddhotels)} hotels")
 
