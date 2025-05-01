@@ -41,9 +41,12 @@ COPY --from=builder /app/requirements.txt .
 # Install dependencies
 RUN pip install --no-cache /wheels/*
 
+# Create data directory and copy CSV file
+RUN mkdir -p /app/data/csv
+COPY data/csv/Copenhagen_hotels_clean.csv /app/data/csv/
+
 # Copy project files
 COPY . .
-
 
 # Change ownership of the app directory
 RUN chown -R appuser:appuser /app
