@@ -1,5 +1,5 @@
-# Use Python 3.11 slim image as base
-FROM python:3.11-slim as builder
+# Use Python 3.12 slim image as base
+FROM python:3.12-slim as builder
 
 # Set working directory
 WORKDIR /app
@@ -21,7 +21,7 @@ COPY requirements.txt .
 RUN pip wheel --no-cache-dir --no-deps --wheel-dir /app/wheels -r requirements.txt
 
 # Final stage
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 # Create non-root user
 RUN adduser --disabled-password --gecos '' appuser
