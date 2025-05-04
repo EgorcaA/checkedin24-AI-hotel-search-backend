@@ -28,7 +28,7 @@ jobs:
           mkdir -p reports/flake8
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=79 --statistics --format=html --htmldir=reports/flake8
       - name: Archive flake8 coverage results
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: flake8-coverage-report
           path: reports/flake8/
@@ -52,7 +52,7 @@ jobs:
         run: |
           pytest -v --cov=app --cov-report=html:reports/pytest/coverage --html=reports/pytest/report.html
       - name: Archive pytest coverage results
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: pytest-coverage-report
           path: reports/pytest/
@@ -70,6 +70,7 @@ jobs:
 
   deploy:
     name: Deploy app
+    needs: [pytest, security_checks, flake8]
     runs-on: ubuntu-latest
     steps:
       # Check out the repository code
