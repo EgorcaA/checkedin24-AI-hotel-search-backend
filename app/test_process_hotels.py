@@ -2,7 +2,12 @@ import json
 import unittest
 
 import pandas as pd
-from process_hotels import filter_and_rank_hotels, find_matching_hotels, normalize_value
+
+from .process_hotels import (
+    filter_and_rank_hotels,
+    find_matching_hotels,
+    normalize_value,
+)
 
 
 class TestProcessHotels(unittest.TestCase):

@@ -26,6 +26,16 @@ repos:
 
   - repo: local
     hooks:
+      - id: pytest
+        name: Run pytest
+        entry: |
+          bash -c '
+          source venv/bin/activate
+          pytest -v
+          '
+        language: system
+        pass_filenames: false
+
       - id: project-structure
         name: Check Project Structure
         entry: |

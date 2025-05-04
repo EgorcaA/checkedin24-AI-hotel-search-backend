@@ -1,59 +1,63 @@
 # Welcome to checkedin24-AI-hotel-search-backend project
 
-**Run server**
+## Technology Stack and Features
 
-Follow these steps:
+- ⚡ [**FastAPI**](https://fastapi.tiangolo.com) for the Python backend API.
+  - 🧰 [SQLModel](https://sqlmodel.tiangolo.com) for the Python SQL database interactions (ORM).
+  - 🔍 [Pydantic](https://docs.pydantic.dev), used by FastAPI, for the data validation and settings management.
+- 🐋 [Docker Compose](https://www.docker.com) for development and production.
+- ✅ Tests with [Pytest](https://pytest.org).
+- 🏭 CI (continuous integration) and CD (continuous deployment) based on GitHub Actions.
+
+**_Run server_**
+
+**Local run**
 
 ```sh
 source ./venv/bin/activate  # Linux/macOS
+pip install -r requirements.txt
 pip install pre-commit
 uvicorn app.main:app --reload
 curl "http://localhost:8000/api/hotels?prompt=I%20want%20a%20hotel%20with%20swimming%20pool"
 ```
 
-'''sh
+**Testing**
 
+```sh
+pytest tests/test_hotels.py -v
+```
+
+**Single container with docker**
+
+```sh
 docker build -t checkedin24-backend ./backend # Build the image
 
-docker run -p 8000:8000 checkedin24-backend # Run the container
+docker run -p 8000:8000 checkedin24-backend # should not work wo API KEY
 
-docker run -p 8000:8000 -e OPENAI_API_KEY=<APIKEY> checkedin24-backend
-'''
+docker run -p 8000:8000 -e OPENAI_API_KEY=<APIKEY> checkedin24-backend # Run the container
 
-docker ps
-docker exec -it 6ad4631b8626 bash
-flyctl ssh console -a checkedin24-ai-hotel-search-backend
-'''sh
+docker system prune -a --volumes # remove images
+```
+
+**Docker-compose option**
+
+```sh
 
 docker-compose up # Start all services
 
-docker-compose up -d # Start in detached mode
+docker-compose up -d # Start in detached mode (background)
 
-docker-compose down # Stop services
+docker-compose down # Stop services (--remove-orphans)
 
 docker-compose logs -f # View logs
 
-'''
+```
 
-I want a hotel with spa dinner and beach
+**Talking to container**
 
-''' sh
-curl "http://localhost:8000/api/hotels?prompt=I%20want%20a%20hotel%20with%20swimming%20pool%20and%20dinner"
+```sh
+docker ps # Running dockers, get (example)6ad4631b8626 (local)
+docker exec -it 6ad4631b8626 bash # Run cmd of container (local)
+flyctl ssh console -a checkedin24-ai-hotel-search-backend # same on fly.io
 
-curl "http://localhost:8000/api/hotels?prompt=I%20want%20a%20hotel%20with%20spa%20dinner%20and%20beach"
-
-{"hotels":[{"hotel_name":"Trendhotel Alcudia - Adults Only +15","clusterchain":"","clusterbrand":"","clustersubbrand":"","pricepernight":211.79,"rating":9.7,"ratingscount":187,"starcategory":4,"mealtype":"breakfast","distancetocity":1.38,"distancetounderground":0.0,"distancetobeach":0.484,"distancetoairport":0.0,"roomcategory":"Standard Double Room","locationtype":"region","locationname":"Mallorca","popular_location_rank":6,"amenities":["cancelable","twenty_four_hour_reception","dinner","elevator","tour_information","seasonal_outdoor_pool","balcony","confirmed_covid_protection_measures","bed_linen","concierge_service","german","shower","private_bathroom","english","mastercard","fitness_facilities","flat_screen_tv","hair_beauty_salon","breakfast","breakfast_buffet","foot_massage","hair_dryer","full_body_massage","full_body_wrap","luggage_storage","facial_treatments","waxing_services","hand_massage","gloves_available_for_guests","pets_allowed","hotel","indoor_pool","in_room_air_conditioning","head_massage","free_hand_sanitizer","body_scrub","manicure","masks_available_for_guests","mask_requirement","massage","minibar","neck_massage","non_smoking_accommodation","non_smoking_rooms","adults_only","couples_massage","offsite_parking","pedicure","disinfectant_cleaning","restaurant","guest_staff_barriers_in_main_areas","back_massage","in_room_safe","sauna","soundproofing","desk","protective_gear_available_for_guests","snack_bar","social_distancing_measures","solarium","sun_loungers_beach_chairs","spa_wellness_center","spa_treatments","spa_relaxation","spanish","beach","beachfront_hotel","ticket_service","visa","laundry_service","wellness","wellness_offers","wellness_hotel","wellness_lounge_relax_area","hot_tub_jacuzzi","room_cleaning"]},{"hotel_name":"Hotel Marina Soller & Wellness Spa","clusterchain":"","clusterbrand":"","clustersubbrand":"","pricepernight":173.71,"rating":9.0,"ratingscount":1860,"starcategory":3,"mealtype":"only_stay","distancetocity":0.72,"distancetounderground":0.0,"distancetobeach":0.121,"distancetoairport":0.0,"roomcategory":"Standard Double Room","locationtype":"region","locationname":"Mallorca","popular_location_rank":6,"amenities":["twenty_four_hour_reception","dinner","adventure","laptop_friendly_workspace","elevator","outdoor_pool","balcony","bar","confirmed_covid_protection_measures","bed_linen","library","business_hotel","ironing_facilities","cafe","concierge_service","steam_bath","german","bathtub_shower_combination","shower","private_bathroom","english","mastercard","fitness_facilities","flat_screen_tv","french","hair_beauty_salon","hair_dryer","garden","shared_lounge_tv_area","luggage_storage","facial_treatments","towels","pets_allowed","hotel","investment_in_local_sustainability_projects","limited_single_use_plastic_items","baby_cots_on_request","kids_pool","kids_meals","kitchenette","individually_controlled_air_conditioning","stovetop","conference_event_rooms","free_onsite_parking","free_hand_sanitizer","body_scrub","refrigerator","organic_food","locally_sourced_food","packed_lunches","manicure","masks_available_for_guests","mask_requirement","massage","energy_reduction_measures","multilingual_staff","microwave","minibar","staff_wear_protective_equipment","sustainable_accommodation","not_wheelchair_accessible","non_smoking_accommodation","non_smoking_rooms","dutch","pedicure","pool_beach_towels","pool_bar","food_waste_reduction_program","recycling","disinfectant_cleaning","restaurant","guest_staff_barriers_in_main_areas","front_desk_safe","in_room_safe","satellite_tv","sauna","desk","protective_gear_available_for_guests","swimming_pool","local_area_shuttle","snack_bar","social_distancing_measures","solarium","sun_umbrellas","sun_loungers_beach_chairs","spa_wellness_center","spa_treatments","spa_relaxation","spanish","beach","beachfront_hotel","renewable_energy_used","tv","tea_coffee_maker","telephone","terrace","ticket_service","vegan","vegetarian","blackout_curtains","visa","hiking","laundry_service","water_saving_bathroom_fixtures","electric_kettle","wellness","wellness_hotel","wellness_lounge_relax_area","hot_tub_jacuzzi","guest_buffer_time","lobby_newspapers","room_cleaning","room_service"]},{"hotel_name":"Grupotel Orient","clusterchain":"Grupotel","clusterbrand":"Grupotel","clustersubbrand":"","pricepernight":165.0,"rating":8.2,"ratingscount":2943,"starcategory":4,"mealtype":"half_board","distancetocity":2.04,"distancetounderground":0.0,"distancetobeach":0.617,"distancetoairport":4.4,"roomcategory":"Standard Double Room","locationtype":"region","locationname":"Mallorca","popular_location_rank":6,"amenities":["twenty_four_hour_reception","dinner","adventure","american_express","assistance_animals_exempt_from_fees_or_restrictions","elevator","tour_information","outdoor_pool","balcony","bar","accessible","accessible_shower","confirmed_covid_protection_measures","bed_linen","library","business_hotel","cafe","cash","computer_workstation","concierge_service","steam_bath","german","diners_club","shower","private_bathroom","individually_packaged_meals_available","english","room_service_meals_available","mastercard","bike_rental","fitness_facilities","flat_screen_tv","french","hair_dryer","garden","shared_lounge_tv_area","luggage_storage","secure_bike_storage","vending_machine_snacks_drinks","gloves_available_for_guests","towels","pets_allowed","hotel","indoor_pool","investment_in_local_sustainability_projects","italian","limited_single_use_plastic_items","baby_cots_on_request","kids_pool","in_room_air_conditioning","conference_event_rooms","contactless_check_in_out","free_hand_sanitizer","masks_available_for_guests","energy_reduction_measures","multilingual_staff","minibar","staff_wear_protective_equipment","sustainable_accommodation","non_smoking_accommodation","non_smoking_rooms","dutch","service_animals_only","pool_bar","food_waste_reduction_program","recycling","disinfectant_cleaning","restaurant","romanian","russian","guest_staff_barriers_in_main_areas","front_desk_safe","in_room_safe","satellite_tv","sauna","desk","protective_gear_available_for_guests","local_area_shuttle","snack_bar","social_distancing_measures","solarium","sun_loungers_beach_chairs","spa_wellness_center","spa_relaxation","spanish","game_room","beach","tv","telephone","tennis_court","terrace","ticket_service","visa","laundry_service","water_saving_bathroom_fixtures","wellness","wellness_hotel","wellness_lounge_relax_area","hot_tub_jacuzzi","guest_buffer_time","room_cleaning"]}],"user_preferences":{"fields":{},"chooseparameters":{},"amenities":{"spa_wellness_center":{"crucial":true,"weight":5},"dinner":{"crucial":true,"weight":5},"beach":{"crucial":true,"weight":5},"restaurant":{"crucial":false,"weight":3},"spa_treatments":{"crucial":false,"weight":3},"beach_bar":{"crucial":false,"weight":2},"beachfront_hotel":{"crucial":false,"weight":2},"spa_relaxation":{"crucial":false,"weight":2},"full_breakfast":{"crucial":false,"weight":1},"bar":{"crucial":false,"weight":1}}}}
-
-curl "https://checkedin24-ai-hotel-search-backend.fly.dev/api/hotels?prompt=I%20want%20a%20hotel%20with%20swimming%20pool"
-
-curl "https://checkedin24-ai-hotel-search-backend.fly.dev/api/hotels?prompt=I%20want%20a%20hotel%20with%20spa%20dinner%20and%20beach"
-
-{"hotels":[{"hotel_name":"Trendhotel Alcudia - Adults Only +15","clusterchain":"","clusterbrand":"","clustersubbrand":"","pricepernight":211.79,"rating":9.7,"ratingscount":187,"starcategory":4,"mealtype":"breakfast","distancetocity":1.38,"distancetounderground":0.0,"distancetobeach":0.484,"distancetoairport":0.0,"roomcategory":"Standard Double Room","locationtype":"region","locationname":"Mallorca","popular_location_rank":6,"amenities":["cancelable","twenty_four_hour_reception","dinner","elevator","tour_information","seasonal_outdoor_pool","balcony","confirmed_covid_protection_measures","bed_linen","concierge_service","german","shower","private_bathroom","english","mastercard","fitness_facilities","flat_screen_tv","hair_beauty_salon","breakfast","breakfast_buffet","foot_massage","hair_dryer","full_body_massage","full_body_wrap","luggage_storage","facial_treatments","waxing_services","hand_massage","gloves_available_for_guests","pets_allowed","hotel","indoor_pool","in_room_air_conditioning","head_massage","free_hand_sanitizer","body_scrub","manicure","masks_available_for_guests","mask_requirement","massage","minibar","neck_massage","non_smoking_accommodation","non_smoking_rooms","adults_only","couples_massage","offsite_parking","pedicure","disinfectant_cleaning","restaurant","guest_staff_barriers_in_main_areas","back_massage","in_room_safe","sauna","soundproofing","desk","protective_gear_available_for_guests","snack_bar","social_distancing_measures","solarium","sun_loungers_beach_chairs","spa_wellness_center","spa_treatments","spa_relaxation","spanish","beach","beachfront_hotel","ticket_service","visa","laundry_service","wellness","wellness_offers","wellness_hotel","wellness_lounge_relax_area","hot_tub_jacuzzi","room_cleaning"]},{"hotel_name":"Hotel Marina Soller & Wellness Spa","clusterchain":"","clusterbrand":"","clustersubbrand":"","pricepernight":173.71,"rating":9.0,"ratingscount":1860,"starcategory":3,"mealtype":"only_stay","distancetocity":0.72,"distancetounderground":0.0,"distancetobeach":0.121,"distancetoairport":0.0,"roomcategory":"Standard Double Room","locationtype":"region","locationname":"Mallorca","popular_location_rank":6,"amenities":["twenty_four_hour_reception","dinner","adventure","laptop_friendly_workspace","elevator","outdoor_pool","balcony","bar","confirmed_covid_protection_measures","bed_linen","library","business_hotel","ironing_facilities","cafe","concierge_service","steam_bath","german","bathtub_shower_combination","shower","private_bathroom","english","mastercard","fitness_facilities","flat_screen_tv","french","hair_beauty_salon","hair_dryer","garden","shared_lounge_tv_area","luggage_storage","facial_treatments","towels","pets_allowed","hotel","investment_in_local_sustainability_projects","limited_single_use_plastic_items","baby_cots_on_request","kids_pool","kids_meals","kitchenette","individually_controlled_air_conditioning","stovetop","conference_event_rooms","free_onsite_parking","free_hand_sanitizer","body_scrub","refrigerator","organic_food","locally_sourced_food","packed_lunches","manicure","masks_available_for_guests","mask_requirement","massage","energy_reduction_measures","multilingual_staff","microwave","minibar","staff_wear_protective_equipment","sustainable_accommodation","not_wheelchair_accessible","non_smoking_accommodation","non_smoking_rooms","dutch","pedicure","pool_beach_towels","pool_bar","food_waste_reduction_program","recycling","disinfectant_cleaning","restaurant","guest_staff_barriers_in_main_areas","front_desk_safe","in_room_safe","satellite_tv","sauna","desk","protective_gear_available_for_guests","swimming_pool","local_area_shuttle","snack_bar","social_distancing_measures","solarium","sun_umbrellas","sun_loungers_beach_chairs","spa_wellness_center","spa_treatments","spa_relaxation","spanish","beach","beachfront_hotel","renewable_energy_used","tv","tea_coffee_maker","telephone","terrace","ticket_service","vegan","vegetarian","blackout_curtains","visa","hiking","laundry_service","water_saving_bathroom_fixtures","electric_kettle","wellness","wellness_hotel","wellness_lounge_relax_area","hot_tub_jacuzzi","guest_buffer_time","lobby_newspapers","room_cleaning","room_service"]},{"hotel_name":"Grupotel Orient","clusterchain":"Grupotel","clusterbrand":"Grupotel","clustersubbrand":"","pricepernight":165.0,"rating":8.2,"ratingscount":2943,"starcategory":4,"mealtype":"half_board","distancetocity":2.04,"distancetounderground":0.0,"distancetobeach":0.617,"distancetoairport":4.4,"roomcategory":"Standard Double Room","locationtype":"region","locationname":"Mallorca","popular_location_rank":6,"amenities":["twenty_four_hour_reception","dinner","adventure","american_express","assistance_animals_exempt_from_fees_or_restrictions","elevator","tour_information","outdoor_pool","balcony","bar","accessible","accessible_shower","confirmed_covid_protection_measures","bed_linen","library","business_hotel","cafe","cash","computer_workstation","concierge_service","steam_bath","german","diners_club","shower","private_bathroom","individually_packaged_meals_available","english","room_service_meals_available","mastercard","bike_rental","fitness_facilities","flat_screen_tv","french","hair_dryer","garden","shared_lounge_tv_area","luggage_storage","secure_bike_storage","vending_machine_snacks_drinks","gloves_available_for_guests","towels","pets_allowed","hotel","indoor_pool","investment_in_local_sustainability_projects","italian","limited_single_use_plastic_items","baby_cots_on_request","kids_pool","in_room_air_conditioning","conference_event_rooms","contactless_check_in_out","free_hand_sanitizer","masks_available_for_guests","energy_reduction_measures","multilingual_staff","minibar","staff_wear_protective_equipment","sustainable_accommodation","non_smoking_accommodation","non_smoking_rooms","dutch","service_animals_only","pool_bar","food_waste_reduction_program","recycling","disinfectant_cleaning","restaurant","romanian","russian","guest_staff_barriers_in_main_areas","front_desk_safe","in_room_safe","satellite_tv","sauna","desk","protective_gear_available_for_guests","local_area_shuttle","snack_bar","social_distancing_measures","solarium","sun_loungers_beach_chairs","spa_wellness_center","spa_relaxation","spanish","game_room","beach","tv","telephone","tennis_court","terrace","ticket_service","visa","laundry_service","water_saving_bathroom_fixtures","wellness","wellness_hotel","wellness_lounge_relax_area","hot_tub_jacuzzi","guest_buffer_time","room_cleaning"]}],"user_preferences":{"fields":{},"chooseparameters":{},"amenities":{"spa_wellness_center":{"crucial":true,"weight":5},"dinner":{"crucial":true,"weight":5},"beach":{"crucial":true,"weight":5},"restaurant":{"crucial":false,"weight":3},"spa_treatments":{"crucial":false,"weight":3},"beach_bar":{"crucial":false,"weight":2},"beachfront_hotel":{"crucial":false,"weight":2},"spa_relaxation":{"crucial":false,"weight":2},"full_breakfast":{"crucial":false,"weight":1},"bar":{"crucial":false,"weight":1}}}}
-
-'''
-
-cd backend && docker-compose down
-docker-compose down --remove-orphans
-docker system prune -a --volumes
-
-docker-compose up -d # detached mode (background)
+```
